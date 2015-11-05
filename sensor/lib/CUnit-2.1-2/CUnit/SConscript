@@ -1,0 +1,17 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+env.AppendUnique( CCFLAGS = '-w' )
+source_files = ( Glob( 'Sources/*.c' ) +
+                 Glob( 'Sources/Automated/*.c' ) +
+                 Glob( 'Sources/Basic/*.c' ) +
+                 Glob( 'Sources/Console/*.c' ) +
+                 Glob( 'Sources/Framework/*.c' ) )
+profiles.StaticLibrary(
+        "cunit",
+        CPPPATH = profiles.build_join( env, "lib", "CUnit-2.1-2", "CUnit", "Headers" ),
+        ).Target( env, source_files, compmap )
+
+
+# EOF

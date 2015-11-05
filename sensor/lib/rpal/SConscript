@@ -1,0 +1,22 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+class Rpal( profiles.StaticLibrary ):
+
+    def __init__( self ):
+        super( Rpal, self ).__init__(
+                "rpal",
+                CPPPATH  = profiles.include_join( env, "rpal" ),
+                CPPFLAGS = "-pthread"
+                )
+
+    def add_env_settings( self, env ):
+        if env[ 'PLATFORM' ][ 'name' ] not in [ 'macosx', 'android' ]:
+            env.AppendUnique( LIBS = "rt" )
+            env.AppendUnique( LIBS = "pthread" )
+            env.AppendUnique( LIBS = "m" )
+
+Rpal().Target( env, Glob( '*.c' ), compmap )
+
+# EOF

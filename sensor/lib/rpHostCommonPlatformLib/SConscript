@@ -1,0 +1,16 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary(
+        'rpHostCommonPlatformLib',
+        profiles.ObfuscatedHeader(),
+        profiles.RpalModule(),
+        ).Target(
+            env,
+            Glob( '*.c' ),
+            compmap,
+            'cryptoLib', 'obfuscationLib', 'MemoryModule', 'b64', 'z', 'curl', 'rpcm', 'Os'
+            )
+
+# EOF

@@ -1,0 +1,250 @@
+$def with ( sensor_id, before, after )
+$var title = sensor_id
+<div class="row">
+    <div class="col-lg-2">
+        <h2>$sensor_id</h2>
+        <h4>Online: <i id="status_indicator" class="glyphicon glyphicon-remove"></i></h4>
+        <i id="last_seen"></i>
+    </div>
+    <div class="col-lg-3">
+        <h4>Last Events</h4>
+        <div style="overflow: auto; height:250px;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="lastevents" style="text-align: left;">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <h4>Filter Events</h4>
+        <form method="GET" action="/sensor">
+            <input type="hidden" name="sensor_id" value="$sensor_id"/>
+            <div class="form-group">
+                <div class='input-group date datetimepicker'>
+                    <span class="input-group-addon">From</span>
+                    <input type='text' class="form-control" name="after" value="$after"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class='input-group date datetimepicker'>
+                    <span class="input-group-addon">To</span>
+                    <input type='text' class="form-control" name="before" value="$before"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-default" id="flux_search">
+                <span class="glyphicon glyphicon-search"></span> Filter
+            </button>
+        </form>
+        <br/>
+        <form method="GET" action="/sensor">
+            <input type="hidden" name="sensor_id" value="$sensor_id"/>
+            <button type="submit" class="btn btn-default" id="flux_live">
+                <span class="glyphicon glyphicon-play"></span> Live
+            </button>
+        </form>
+    </div>
+    <div class="col-lg-2">
+        <h4>Objects</h4>
+        <table class="table table-striped">
+            <tr>
+                <td>Processes</td>
+                <td><a href="/hostobjects?sensor_id=$sensor_id&otype=PROCESS_NAME" title="View All" class="glyphicon glyphicon-log-in"></a></td>
+            </tr>
+            <tr>
+                <td>Modules</td>
+                <td><a href="/hostobjects?sensor_id=$sensor_id&otype=MODULE_NAME" title="View All" class="glyphicon glyphicon-log-in"></a></td>
+            </tr>
+            <tr>
+                <td>Services</td>
+                <td><a href="/hostobjects?sensor_id=$sensor_id&otype=SERVICE_NAME" title="View All" class="glyphicon glyphicon-log-in"></a></td>
+            </tr>
+            <tr>
+                <td>Autoruns</td>
+                <td><a href="/hostobjects?sensor_id=$sensor_id&otype=AUTORUNS" title="View All" class="glyphicon glyphicon-log-in"></a></td>
+            </tr>
+            <tr>
+                <td>Modules</td>
+                <td><a href="/hostobjects?sensor_id=$sensor_id&otype=MODULE_NAME" title="View All" class="glyphicon glyphicon-log-in"></a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <hr/>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Event</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="timeline">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .t_event {
+        display: none;
+    }
+</style>
+<script>
+    function set_connected( isConnected, last_seen )
+    {
+        if( !isConnected )
+        {
+            jQuery('#status_indicator').removeClass( 'glyphicon-ok' );
+            jQuery('#status_indicator').addClass( 'glyphicon-remove' );
+            jQuery('#status_indicator').css( 'color', 'red' );
+            if( last_seen )
+            {
+                jQuery('#last_seen').text( 'Last seen: ' + ts_to_time( last_seen ) );
+            }
+        }
+        else
+        {
+            jQuery('#status_indicator').removeClass( 'glyphicon-remove' );
+            jQuery('#status_indicator').addClass( 'glyphicon-ok' );
+            jQuery('#status_indicator').css( 'color', 'green' );
+            jQuery('#last_seen').text( '' );
+        }
+    }
+
+    function do_refresh_online()
+    {
+        jQuery.getJSON( '/sensor_state',
+                    { sensor_id : "$sensor_id" } ).done(function(data){set_connected(data.is_online, data.lastseen);})
+                                                  .fail(function(){set_connected(false);})
+                                                  .always(function(){setTimeout( do_refresh_online, 5000 );});
+    }
+
+    var from_time = 0;
+    var all_events = {};
+
+    function add_to_timeline( info )
+    {
+        if( 'events' in info )
+        {
+            events = info[ 'events' ];
+        }
+        else
+        {
+            events = [];
+        }
+        if( 'new_start' in info )
+        {
+            from_time = info[ 'new_start' ];
+        }
+
+        jQuery.each(events,function(){
+            var e = this;
+            if ( !( e[ 2 ] in all_events ) )
+            {
+                var eventContent = '<<< Too Large >>>';
+
+                if( e[ 3 ] )
+                {
+                    eventContent = '<pre><code>' + JSON.stringify( e[ 3 ], null, 2 ) + '</code></pre>';
+                }
+
+                jQuery('#timeline').prepend(
+                    jQuery('<tr>').append(
+                        jQuery('<td>').html( ts_to_time( Math.floor( e[ 0 ] / 1000 ) ) )
+                    ).append(
+                        jQuery('<td>').html( e[ 1 ] )
+                    ).append(
+                        jQuery('<td>').html( eventContent )
+                                      .css('text-align','left')
+                    ).append(
+                        jQuery('<td>').append( jQuery('<a>').attr('href','/event?id=' + e[ 2 ] )
+                                                            .attr('title','View Event')
+                                                            .addClass('glyphicon' )
+                                                            .addClass('glyphicon-log-in') )
+                    ).attr( 'id', e[ 2 ] )
+                     .addClass( 't_event' )
+                     .show('slow')
+                );
+                from_time = Math.floor( e[ 0 ] / 1000 );
+                all_events[ e[ 2 ] ] = 0;
+                if( 50 < Object.keys( all_events ).length )
+                {
+                    event = jQuery( '.t_event' ).last();
+                    t_id = event.attr( 'id' );
+                    delete all_events[ t_id ];
+                    event.remove();
+                }
+            }
+        });
+
+        hljs.initHighlighting.called = false;
+        hljs.initHighlighting();
+    }
+
+    function do_refresh_timeline()
+    {
+        future = jQuery.getJSON( '/timeline',
+                    { sensor_id : "$sensor_id",
+                      $if before is not None:
+                          before : Date.parse("$before" + " GMT") / 1000,
+                      $if after is not None:
+                          after : Date.parse("$after" + " GMT") / 1000
+                      $else:
+                          after : from_time
+                     }).done(function(data){add_to_timeline(data);})
+                                                            .fail(function(){add_to_timeline([]);});
+
+        $if before is None:
+            future.always(function(){setTimeout( do_refresh_timeline, 5000 );});
+    }
+
+    function set_lastevents( events )
+    {
+        jQuery('#lastevents').empty();
+
+        jQuery.each(events,function(){
+            var e = this;
+
+            jQuery('#lastevents').prepend(
+                jQuery('<tr>').append(
+                    jQuery('<td>').html( e[ 0 ] )
+                ).append(
+                    jQuery('<td>').append( jQuery('<a>').attr('href','/event?id=' + e[ 1 ] )
+                                                        .attr('title','View Event')
+                                                        .addClass('glyphicon' )
+                                                        .addClass('glyphicon-log-in') )
+                )
+            );
+        });
+    }
+
+    function do_refresh_lastevents()
+    {
+        jQuery.getJSON( '/lastevents',
+                        { sensor_id : "$sensor_id" } ).done(function(data){set_lastevents(data);})
+                                                      .always(function(){setTimeout( do_refresh_lastevents, 10000 );});
+    }
+
+    jQuery( function(){
+        do_refresh_online();
+        do_refresh_timeline();
+        do_refresh_lastevents();
+    });
+</script>

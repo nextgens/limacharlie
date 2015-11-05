@@ -1,0 +1,7 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary( 'rpcm' ).Target( env, Glob( '*.c' ), compmap, 'rpal' )
+
+# EOF

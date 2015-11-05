@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D4EF75DC-05DF-464D-9738-D432087908FF}</ProjectGuid>
+    <RootNamespace>rpHCP_AdaptiveAnomalyDetector</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\property_sheets\rpal.props" />
+    <Import Project="..\..\property_sheets\windows_general.props" />
+    <Import Project="..\..\property_sheets\windows_release.props" />
+    <Import Project="..\..\property_sheets\windows_x86.props" />
+    <Import Project="..\..\property_sheets\obfuscation.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\property_sheets\rpal.props" />
+    <Import Project="..\..\property_sheets\windows_general.props" />
+    <Import Project="..\..\property_sheets\windows_debug.props" />
+    <Import Project="..\..\property_sheets\windows_x86.props" />
+    <Import Project="..\..\property_sheets\obfuscation.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\property_sheets\rpal.props" />
+    <Import Project="..\..\property_sheets\windows_general.props" />
+    <Import Project="..\..\property_sheets\windows_release.props" />
+    <Import Project="..\..\property_sheets\windows_x64.props" />
+    <Import Project="..\..\property_sheets\obfuscation.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\property_sheets\rpal.props" />
+    <Import Project="..\..\property_sheets\windows_general.props" />
+    <Import Project="..\..\property_sheets\windows_debug.props" />
+    <Import Project="..\..\property_sheets\windows_x64.props" />
+    <Import Project="..\..\property_sheets\obfuscation.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile />
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="aad.c" />
+    <ClCompile Include="main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\lib\cryptoLib\cryptoLib.vcxproj">
+      <Project>{533b36b9-e781-4132-baa7-33bf68de7013}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\libOs\libOs.vcxproj">
+      <Project>{b344474d-101c-4eeb-ac48-40f1d5489bfd}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\librpcm\librpcm.vcxproj">
+      <Project>{211cf5f8-3282-4133-a974-2c6fabde66b3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\networkLib\networkLib.vcxproj">
+      <Project>{ce91d7d4-2853-59a4-b328-cfeb4659323a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\notificationsLib\notificationsLib.vcxproj">
+      <Project>{9422eaaf-5989-3ed4-4df1-64fa6c3d6a71}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\obfuscationLib\obfuscationLib.vcxproj">
+      <Project>{53e5cf95-eaba-412b-82c4-39632419171f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\processLib\processLib.vcxproj">
+      <Project>{55ed069a-2899-3dfa-cccd-9036543e919f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\rpal\rpal.vcxproj">
+      <Project>{c8461925-62d7-49ff-a7c7-6cb5f73fa441}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\rpHostCommonPlatformIFaceLib\rpHostCommonPlatformIFaceLib.vcxproj">
+      <Project>{b0349999-458d-4831-a9f7-0568156c9534}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\rpHostCommonPlatformLib\rTags.h" />
+    <ClInclude Include="aad.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,15 @@
+Import( 'env' )
+Import( 'compmap' )
+
+for subdir in [
+    'rpal_test',
+    'rpHCP_test',
+    'processLib_test',
+    ]:
+    SConscript(
+            dirs = [ subdir ],
+            file = 'SConscript', 
+            exports = dict( env = env.Clone(), compmap = compmap )
+            )
+
+# EOF

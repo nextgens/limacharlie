@@ -1,0 +1,10 @@
+Import( 'env' )
+Import( 'compmap' )
+
+for subdir in [ 'lib', 'tests', 'executables' ]:
+    SConscript(
+            dirs = [ subdir ],
+            file = "SConscript",
+            exports = dict( env = env.Clone(), compmap = compmap )
+            )
+

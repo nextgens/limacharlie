@@ -1,0 +1,12 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+env.AppendUnique( CCFLAGS = '-w' )
+profiles.StaticLibrary( 'z' ).Target(
+        env,
+        Glob( '*.c' ),
+        compmap, 'rpal'
+        )
+
+# EOF

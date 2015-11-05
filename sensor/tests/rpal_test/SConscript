@@ -1,0 +1,11 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.make_rpal_master( env )
+profiles.Program(
+        'rpal_test',
+        profiles.RpalModule()
+        ).Target( env, 'main.c', compmap, 'cunit', 'rpal' )
+
+# EOF

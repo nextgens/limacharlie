@@ -1,0 +1,7 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary( 'networkLib' ).Target( env, 'networkLib.c', compmap, 'rpal', 'rpcm' )
+
+# EOF

@@ -1,0 +1,21 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+
+env.AppendUnique( LIBS = 'm' )
+profiles.DynamicLibrary( 'rpHCP_test' ).Target(
+        env,
+        Glob( '*.c' ),
+        compmap,
+        'rpHostCommonPlatformIFaceLib',
+        'processLib',
+        'cryptoLib',
+        'networkLib',
+        'Os',
+        'rpcm',
+        'rpal'
+        )
+
+
+# EOF

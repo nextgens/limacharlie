@@ -1,0 +1,166 @@
+import sys
+for subdir in [ 'property_sheets', 'scripts' ]:
+    sys.path.append( '%s/%s' % ( Dir( '.' ).abspath, subdir ) )
+import platform
+import profiles
+import os.path
+import systems
+
+def dehash( path ):
+    cp = os.path.commonprefix( [ path, "#/" ] )
+    return os.path.abspath( path[ len( cp ): ] )
+
+# Setup the environment
+Execute( Mkdir( 'bin' ) )
+
+# Base environment.
+common_env = Environment()
+common_env.Clean( '.', 'bin' )
+common_env.Replace( LINKFLAGS = [] )
+common_env.Append( CPPPATH = [ '.' ] )
+common_env.Append( CCFLAGS = [ '-fPIC' ] )
+common_env.Append( CFLAGS = [ '-fvisibility=hidden' ] )
+common_env.Append( LIBS = [] )
+common_env.Append( LIBPATH = [] )
+common_env[ 'HOST' ] = dict(
+        system = platform.system().lower(),
+        arch   = platform.machine().lower()
+        )
+
+# Platform characterization.
+if 'android' in ARGUMENTS:
+    platform_name = "android"
+    platform_version = "legacy"
+    platform_arch = "arm"
+else:
+    platform_name = systems.name()
+    platform_version = systems.version()
+    platform_arch = systems.arch()
+common_env[ 'PLATFORM' ] = dict(
+        name = platform_name.lower(),
+        version = platform_version.lower(),
+        arch = platform_arch.lower()
+        )
+BUS_SIZE = dict(
+        i386   = 32,
+        x86    = 32,
+        i686   = 32,
+        x86_64 = 64,
+        arm    = 32
+        )
+try:
+    common_env[ 'BUS_SIZE' ] = BUS_SIZE[ platform_arch ]
+except IndexError:
+    raise RuntimeError(
+            "Unrecognized architecture: %s -- Known archs: %s" % (
+                platform_arch, ", ".join( BUS_SIZE.keys() )
+                )
+            )
+
+# Platform-specific settings.
+if platform_name == systems.name():
+    print "Native build."
+    minor_platform = platform_name.upper()
+    if 'MACOSX' == minor_platform:
+        common_env.Append( CCFLAGS = "-mmacosx-version-min=10.7" )
+        common_env.Append( LINKFLAGS = "-mmacosx-version-min=10.7" )
+    else:
+        minor_version = int( platform_version[ :platform_version.find( '.' ) ] )
+        common_env.Append(
+                CPPDEFINES = [
+                    'RP_HCP_PLATFORM_CURRENT_MINOR=RP_HCP_PLATFORM_MINOR_LINUX_%s_%d' % ( minor_platform, minor_version )
+                    ]
+                )
+    if 'x86_64' != platform_arch:
+        common_env.AppendUnique( CCFLAGS = [ '-march=' + platform_arch ] )
+elif platform_name == "android":
+    if platform_arch != "arm":
+        raise RuntimeError( "Only the ARM architecture is supported for the Android platform." )
+    android_base = os.getenv( "ANDROID_NDK_ROOT" )
+    if android_base is None:
+        raise RuntimeError( "Please define environment variable ANDROID_NDK_ROOT so it points to the directory where your Android NDK is stored. You must use version NDK 10 or higher." )
+    print "Android build using NDK at %s." % android_base
+    android_toolchain = os.path.join(
+            android_base,
+            "toolchains/arm-linux-androideabi-4.9/prebuilt/%s-%s/bin/arm-linux-androideabi-" % (
+                common_env[ 'HOST' ][ 'system' ],
+                common_env[ 'HOST' ][ 'arch' ]
+                )
+            )
+    android_platform = os.path.join( android_base, "platforms/android-21/arch-arm" )
+    common_env.Replace(
+            CC        = android_toolchain + "gcc",
+            CXX       = android_toolchain + "g++",
+            LINK      = android_toolchain + "gcc",
+            SHLINK    = android_toolchain + "gcc",
+            AR        = android_toolchain + "ar",
+            RANLIB    = android_toolchain + "ranlib",
+            STRIP     = android_toolchain + "strip",
+            LINKCOM   = common_env[ 'LINKCOM' ] + " %s %s -ldl -lc -lgcc" % (
+                os.path.join( android_platform, "usr/lib/crtbegin_dynamic.o" ),
+                os.path.join( android_platform, "usr/lib/crtend_android.o" )
+                ),
+            SHLINKCOM = common_env[ 'SHLINKCOM' ] + " %s %s -ldl -lc -lgcc" % (
+                os.path.join( android_platform, "usr/lib/crtbegin_so.o" ),
+                os.path.join( android_platform, "usr/lib/crtend_so.o" )
+                )
+            )
+    common_env.Append(
+            CCFLAGS     = [ '-nostdlib' ],
+            CPPPATH     = [ os.path.join( android_platform, "usr/include" ) ],
+            CPPDEFINES  = [ 
+                'RPAL_PLATFORM_DISABLE_DETECTION',
+                'RPAL_PLATFORM_LINUX',
+                'RPAL_PLATFORM_ANDROID',
+                'RPAL_PLATFORM_LINUX_32',
+                'RPAL_PLATFORM_32_BIT',
+                'RPAL_PLATFORM_LITTLE_ENDIAN'
+                ],
+            LINKFLAGS   = [ '-nostdlib' ],
+            LIBPATH     = [ os.path.join( android_platform, "usr/lib" ) ]
+            )
+    os.putenv( "LIBS", "-ldl -lc -lgcc" )
+    for envvar, field in [
+            ( "CC", "CC" ),
+            ( "LD", "LINK" ),
+            ( "AR", "AR" ),
+            ( "RANLIB", "RANLIB" )
+            ]:
+        os.putenv( envvar, common_env[ field ] )
+else:
+    raise RuntimeError( "Unknown platform: %s" % platform_name )
+
+# Release environment.
+release_env = common_env.Clone()
+release_env.Append( CPPDEFINES = [ 'RELEASE', 'NDEBUG' ] )
+release_env.Append( CCFLAGS = [ '-O3' ] )
+release_env[ 'IS_DEBUG' ] = False
+
+# Debug environment.
+debug_env = common_env.Clone()
+debug_env.Append( CPPDEFINES = [ 'DEBUG', '_DEBUG' ] )
+debug_env.Append( CCFLAGS = [ '-ggdb', '-O0' ] )
+debug_env[ 'IS_DEBUG' ] = True
+
+# Build all types.
+for build_type, env in [ ( "debug", debug_env ), ( "release", release_env ) ]:
+    build_dir = os.path.join( "bin", platform_name, platform_version, platform_arch, build_type )
+    VariantDir( build_dir, "." )
+    env[ 'BUILD_DIR' ] = build_dir
+    env.Append( LIBPATH = [ os.path.join( "#", build_dir ) ] )
+    os.putenv( "CFLAGS", " ".join( env[ "CFLAGS" ] + env[ "CCFLAGS" ]) )
+    os.putenv( "CPPFLAGS", " ".join( "-I" + d for d in env[ "CPPPATH" ] ) )
+    os.putenv( 
+            "LDFLAGS",
+            " ".join(
+                env[ "LINKFLAGS" ] +
+                [ "-L" + dehash( d ) for d in env[ "LIBPATH" ] ]
+                )
+            )
+    env.SConscript(
+            os.path.join( build_dir, 'SConscript' ),
+            exports = dict( env = env, compmap = {} )
+            )
+
+
+# EOF

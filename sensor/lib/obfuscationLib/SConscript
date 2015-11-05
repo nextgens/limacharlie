@@ -1,0 +1,7 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary( "obfuscationLib" ).Target( env, 'main.c', compmap, "rpal" )
+
+# EOF

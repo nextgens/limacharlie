@@ -1,0 +1,24 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.DynamicLibrary(
+        'rpHCP_HostBasedSensor',
+        profiles.ObfuscatedHeader(),
+        profiles.GitInfo(),
+        LIBS = 'm'
+        ).Target(
+            env,
+            Glob( '*.c' ),
+            compmap,
+            'rpHostCommonPlatformIFaceLib',
+            'processLib', 
+            'notificationsLib',
+            'cryptoLib',
+            'networkLib',
+            'Os',
+            'obfuscationLib'
+            )
+
+
+# EOF

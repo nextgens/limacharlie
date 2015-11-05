@@ -1,0 +1,11 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+env.AppendUnique( CPPPATH = '../mbedtls/mbedtls-2.1.2/include' )
+profiles.StaticLibrary( "cryptoLib" ).Target(
+        env,
+        'cryptoLib.c',
+        compmap, "rpal", "mbedtls"
+        )
+
+# EOF

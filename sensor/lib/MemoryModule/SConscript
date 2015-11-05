@@ -1,0 +1,12 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary( "MemoryModule", LIBS = "dl" ).Target(
+        env,
+        'MemoryModule.c',
+        compmap, 'rpal'
+        )
+
+
+# EOF

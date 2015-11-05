@@ -1,0 +1,11 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary( 'notificationsLib' ).Target(
+        env,
+        'notificationsLib.c',
+        compmap, 'rpal', 'rpcm'
+        )
+
+# EOF

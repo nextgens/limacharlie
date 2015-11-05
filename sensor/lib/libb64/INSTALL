@@ -1,0 +1,33 @@
+libb64: Base64 Encoding/Decoding Routines
+======================================
+
+Requirements:
+------------
+This piece of software has minimal requirements. I have tested it on a Linux
+machine, with the following specs, both hard and soft:
+	* FedoraCore 4
+	* kernel v. 2.6.11 (stock FC4 kernel)
+	* gcc version 4.0.1 20050727 (Red Hat 4.0.1-5)
+	* glibc-2.3.5-10
+	* make v. 3.80
+	* some arb version of makedepend
+
+I have, as yet, not tested it on a Windows machine. But barring any serious
+screwups on my part, this should compile and run sweetly under Cygwin too.
+If you DO get it running under some weird arch/os setup, send me a 
+mail, please.
+
+Compiling:
+---------
+There is no configure. It would be overkill for something so simple...
+Run make in the root directory.
+
+Installing:
+----------
+Since the current targets are standalone executables and a static library
+(fancy name for archive), an install script has not been implemented yet.
+Simply copy the executabled into your path, and use them.
+
+--
+peace out
+Chris

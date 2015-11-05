@@ -1,0 +1,20 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.make_rpal_master( env )
+profiles.Program(
+        'processLib_test',
+        profiles.RpalModule()
+        ).Target(
+            env,
+            'main.c',
+            compmap,
+            'processLib',
+            'Os',
+            'rpal',
+            'rpcm',
+            'cunit'
+            )
+
+# EOF

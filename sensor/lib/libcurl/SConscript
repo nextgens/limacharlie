@@ -1,0 +1,158 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+import sys
+import os
+import os.path
+import distutils.core
+import subprocess
+import shutil
+import time
+
+
+def run(cmd):
+    """Run a command and decipher the return code. Exit by default."""
+    # Assumes that if a process doesn't call exit, it was successful
+    code = subprocess.call( cmd, shell = True )
+    if code != 0:
+        print "Error: return code: " + str(code)
+        if GetOption( 'keep_going' ) == 0:
+            sys.exit(code)
+
+def configure_make_install(pkg_name, src, env, configure_flags):
+    build_dir = env[ 'BUILD_DIR' ]
+
+    startdir = os.getcwd()
+    if not os.path.exists( build_dir ):
+        os.makedirs( build_dir )
+    os.chdir( build_dir )
+
+    if not os.path.exists(pkg_name):
+        print '... untarring source files'
+        run('tar xfz ' + src.abspath)
+    os.chdir( pkg_name )
+
+    configure_flags = [ "--prefix=" + os.path.abspath( ".." ),
+                        "--disable-shared",
+                        "--enable-static" ] + configure_flags
+    if env[ 'PLATFORM' ][ 'name' ] == 'android':
+        configure_flags += [
+                '--target=arm-linux-androideabi',
+                '--host=arm-linux-androideabi',
+                '--build=%s-%s' % ( env[ 'HOST' ][ 'arch' ], env[ 'HOST' ][ 'system' ] )
+                ]
+    elif env[ 'BUS_SIZE' ] == 32:
+        configure_flags.append( '--host=i686-pc-linux-gnu' )
+    elif env[ 'BUS_SIZE' ] == 64:
+        configure_flags.append( '--host=x86_64' )
+    if env[ 'IS_DEBUG' ]:
+        configure_flags.append( '--enable-debug' )
+
+    if os.path.exists('config.status'):
+        print '... configure is up-to-date'
+    else:
+        print '... running configure %s: %s' % ( ' '.join( configure_flags ), time.asctime(time.localtime(time.time())) )
+        run('./configure %s' % ' '.join( configure_flags ) )
+
+    print '... running make: ' + time.asctime(time.localtime(time.time()))
+    run( 'make' )
+    print '... make finished, now install: ' + time.asctime(time.localtime(time.time()))
+    run( 'make install' )
+    os.chdir( startdir )
+    
+
+def SetUpCurlOnCAres(target, source, env):
+    C_ARES_FLAGS = []
+    if env[ 'IS_DEBUG' ]:
+        C_ARES_FLAGS.append( '--enable-curldebug' )
+    configure_make_install(
+            'c-ares-1.10.0',
+            source[0],
+            env,
+            C_ARES_FLAGS
+            )
+
+    CURL_FLAGS = [ '--without-ssl',
+                   '--without-librtmp',
+                   '--without-librt',
+                   '--disable-ftp',
+                   '--disable-ldap',
+                   '--disable-telnet',
+                   '--disable-dict',
+                   '--disable-file',
+                   '--disable-tftp',
+                   '--disable-pop3',
+                   '--disable-imap',
+                   '--disable-rtsp',
+                   '--disable-smtp',
+                   '--disable-gopher',
+                   '--without-zlib',
+                   '--without-libidn',
+                   '--enable-hidden-symbols',
+                   '--disable-verbose',
+                   '--disable-manual',
+                   '--disable-ipv6',
+                   '--disable-cookies',
+                   '--enable-ares=' + os.path.abspath( env[ "BUILD_DIR" ] ) 
+                   ]
+    configure_make_install(
+            'curl-7.34.0',
+            source[1],
+            env,
+            CURL_FLAGS
+            )
+    
+    print( '... moving binaries to build directory: ' + time.asctime(time.localtime(time.time())) )
+    shutil.copyfile(
+            os.path.join( env[ 'BUILD_DIR' ], 'c-ares-1.10.0', '.libs', 'libcares.a' ),
+            os.path.join( env[ 'BUILD_DIR' ], 'libcares.a' )
+            )
+    shutil.copyfile(
+            os.path.join( env[ 'BUILD_DIR' ], 'curl-7.34.0', 'lib', '.libs', 'libcurl.a' ),
+            os.path.join( env[ 'BUILD_DIR' ], 'libcurl.a' )
+            )
+    
+    return 0
+
+
+def log_output_fn(target, source, env):
+    """The message seen in build logs when this action is called"""
+    return "Building '%s'\n from '%s'\n at: %s" % (target[0], source[0], 
+      time.asctime(time.localtime(time.time())))
+
+libcurl = env.Command(
+        target = [
+            os.path.join( "#", env[ 'BUILD_DIR' ], p )
+            for p in (
+                [ "libcurl.a", "libcares.a" ] +
+                [
+                    os.path.join( "include", "curl", pp )
+                    for pp in [ "curl.h", "curlrules.h", "curlver.h",
+                        "easy.h", "multi.h", "typecheck-gcc.h", "curlbuild.h"]
+                    ]
+                )
+            ],
+        source = [
+            os.path.join( "#", env[ 'BUILD_DIR' ], 'lib', 'libcurl', p )
+            for p in [ 'c-ares-1.10.0.tar.gz', 'curl-7.34.0.tar.gz' ]
+            ],
+        action = Action(SetUpCurlOnCAres, strfunction = log_output_fn),
+        )
+
+
+class Curl( profiles.Component ):
+
+    def __init__( self, node ):
+        super( Curl, self ).__init__(
+                "curl",
+                None,  # No builder here, we don't intend on calling Target().
+                CPPDEFINES = [ "CURL_STATICLIB" ],
+                CPPPATH = [ profiles.include_join( env ) ],
+                LIBS = [ "curl", "cares" ]
+                )
+        self.node = node
+
+compmap[ "curl" ] = Curl( libcurl )
+
+
+# EOF

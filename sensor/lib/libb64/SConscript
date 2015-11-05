@@ -1,0 +1,8 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+source_files = [ 'b64Wrappers.c', 'cdecode.c', 'cencode.c' ]
+profiles.StaticLibrary( "b64" ).Target( env, source_files, compmap, 'rpal' )
+
+# EOF

@@ -1,0 +1,14 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary(
+        'rpHostCommonPlatformIFaceLib',
+        profiles.RpalModule()
+        ).Target(
+            env,
+            'main.c',
+            compmap, 'rpcm'
+            )
+
+# EOF

@@ -1,0 +1,96 @@
+#! /bin/bash
+
+### BEGIN INIT INFO
+# Provides:          rphcp
+# Required-Start:    $local_fs $network $syslog
+# Required-Stop:     $local_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: rphcp
+# Description:       rphcp
+### END INIT INFO
+
+SERVICE="rphcp"
+RETVAL=0
+PROCESS=`pgrep -x -u 0 $SERVICE`
+
+start()
+{
+    if [ "$PROCESS" ]
+    then
+        echo "$SERVICE appears to already be running"
+    else
+        echo "$SERVICE is being started"
+        ulimit -c %CORE_SIZE%
+        /bin/$SERVICE 2>/dev/null >/dev/null &
+    fi
+}
+
+stop()
+{
+    if [ "$PROCESS" ]
+    then
+        kill -s SIGINT `pgrep -x -u 0 $SERVICE`
+        echo "$SERVICE is now stopping"
+        sleep 20
+        RETEST=`pgrep -x -u 0 $SERVICE`
+        if [ "$RETEST" ]
+        then
+            echo "$SERVICE still running... waiting for exit..."
+            sleep 30
+            RETEST=`pgrep -x -u 0 $SERVICE`
+            if [ "$RETEST" ]
+            then
+                echo "$SERVICE failed to stop in expected time."
+                exit 1
+            fi
+        else
+            echo "$SERVICE stopped successfully"
+        fi
+    else
+        echo "$SERVICE not found"
+        exit 1
+    fi
+}
+
+status()
+{
+    if [ "$PROCESS" ]
+    then
+        echo "$SERVICE is running"
+    else
+        echo "$SERVICE is stopped"
+    fi
+}
+
+restart()
+{
+    if [ "$PROCESS" ]
+    then
+        stop
+    else
+        echo "$SERVICE was already stopped"
+    fi
+
+    start
+}
+
+case $1 in
+start)
+start
+;;
+stop)
+stop
+;;
+restart)
+restart
+;;
+status)
+status
+;;
+*)
+echo $"Usage: $0 {start|stop|restart|status}"
+exit 1
+esac
+exit $RETVAL
+

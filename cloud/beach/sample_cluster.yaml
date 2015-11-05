@@ -1,0 +1,59 @@
+# The number of python process instance per host
+# if it is absent or 0, will default to number of cores
+n_processes: 0
+
+# The directory that contain the python code
+# for the cloud
+code_directory: ./
+
+# The nodes that should be used as seeds in your
+# environment, they should be somewhat stable but
+# more is better
+# If not set, a single node cluster on localhost is assumed
+#seed_nodes:
+#    - 1.2.3.4
+
+# This is the ZMQ port used on each host by the ActorHost
+# to request the list of Actor endpoints from the HostManager
+# Default: ipc:///tmp/py_beach_directory_port
+directory_port: ipc:///tmp/py_beach_directory_port
+
+# This is the TCP port used between the hosts of the cloud
+# to talk to each other
+# Default: 4999
+ops_port: 4999
+
+# The TCP port range where Actors will be listening to
+# for communications with other Actors
+# Default: 5000-6000
+port_range_start: 5000
+port_range_end: 6000
+
+# The network interface used for inter-node comms
+# Default: eth0
+interface: eth0
+
+# A keepalive request is sent between nodes every X seconds
+# Default: 60
+peer_keepalive_seconds: 60
+
+
+# A keepalive request is sent to python instances on the host
+# every X seconds
+# Default: 60
+instance_keepalive_seconds: 30
+
+# Directories are exchanged between nodes over X seconds
+# Default 60
+directory_sync_seconds: 60
+
+# Number of seconds a tombstone will exist (and will be shared
+# across nodes in syncs before it is culled. This should be
+# greater than the maximum time a node may be isolated
+# Default: 3600
+tombstone_culling_seconds: 3600
+
+# The strategy used to choose which instance on a host
+# will receive the new actor
+# Default: random
+instance_strategy: random

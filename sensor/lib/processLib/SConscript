@@ -1,0 +1,11 @@
+Import( 'env' )
+Import( 'compmap' )
+import profiles
+
+profiles.StaticLibrary( 'processLib' ).Target(
+        env,
+        'processLib.c',
+        compmap, 'rpal', 'rpcm'
+        )
+
+# EOF
