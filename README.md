@@ -1,4 +1,6 @@
 # LIMA CHARLIE
+![LIMA CHARLIE](https://raw.github.com/refractionPOINT/limacharlie/master/doc/lc.png)
+
 *Stay up to date with new features and detection modules: [@rp_limacharlie](https://twitter.com/rp_limacharlie)*
 
 ## Overview
@@ -466,7 +468,7 @@ HCP, so it is tasked from the cloud and does not persist on the endpoints, makin
 across the fleet.
 
 ## Architecture
-Upcoming diagram here.
+![Architecture](https://raw.github.com/refractionPOINT/limacharlie/master/doc/architecture.png)
 
 ## Crypto Talk
 ### Algorithms
