@@ -2,6 +2,8 @@
 ![LIMA CHARLIE](https://raw.github.com/refractionPOINT/limacharlie/master/doc/lc.png)
 
 *Stay up to date with new features and detection modules: [@rp_limacharlie](https://twitter.com/rp_limacharlie)*
+*Need help? Contact other LC users via the Google Group: https://groups.google.com/d/forum/limacharlie*
+*For more direct enquiries, contact us at limacharlie@refractionpoint.com*
 
 ## Overview
 LIMA CHARLIE is an endpoint security platform. It is itself a collection of small projects all working together
@@ -12,6 +14,10 @@ is the HBS sensor, which provides telemetry gathering and basic forensic capabil
 Many of those individual features are provided through other platforms, so why LC? LC gives you a single 
 messaging, cloud and analytic fabric that will integrate with anything and scale up. Sensor is extra-light
 and installs nothing on the host.
+
+Ultimately LC is meant to be a platform for the security community to experiment with, a starter kit to have the 
+endpoint monitoring you want or to the platform enabling you to try new endpoint techniques without the hassle of
+rebuilding the basics.
 
 ### HCP vs HBS
 Simply put, HCP is the base sensor that can load additional modules in memory, takes care of crypto, message 
@@ -514,3 +520,32 @@ admin)
 
 ### Nix
 It's simpler, cd to the sensor/ directory and run `scons`.
+
+## Utilities
+### HBS Profile
+Configuring which collectors are running, which events are sent back to the cloud or configure specific parameters
+for a collector, use the `/cloud/beach/generate_sensor_profily.py`. If you'd like to understand and tweak the exact
+parameters, you may have a look at the `/cloud/beach/sample_hbs.profile` which uses the RPCM Python API directly,
+it's what the generator python script produces anyway.
+
+### Update Headers
+If you're expanding on the endpoint side, you will likely want to add new tags. To add a new tag, add it to the base
+JSON file `/meta_headers/rp_hcp_tags.json` and then call `/tools/update_headers.py`. This last script will take the
+tag definition you've added and will generate the various C and JSON headers for the other components of the system.
+
+## LIMA CHARLIE WEB UI
+The LC web UI is not meant to be the end-all-be-all for LC, but rather a simple UI to get you started visualizing
+the data coming back from the endpoints and even exploring some of the pivoted Object data. It is in itself quite
+useful, but it's not a SIEM. The logical place for a SIEM is not the event stream itself, it's the Detects generated
+since this is where the "signals" are generated.
+
+All this being said, future more advanced capabilities are likely to use the UI as a proof of concept.
+
+## Next Steps
+Please, feel at home contributing and testing out with the platform, it's what its for. HBS currently has some limitations
+, mainly around being User Mode only. User Mode is great for stability (not going to blue screen boxes) and speed
+of prototyping, but it lacks many of the low level event-driven APIs to do things like getting callbacks for processes
+creation. So here are some of the capabilities that are coming:
+- Kernel Mode thin module providing low level events and APIs.
+- Code injection detection through stack introspection.
+- Stateful detections.
